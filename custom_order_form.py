@@ -11,7 +11,6 @@ st.write("Which fruits you want to customize smoothie!")
 name_on_order = st.text_input("Name on smoothie:")
 st.write("The Name on Your smoothie is", name_on_order)
 
-session = get_active_session()
 my_dataframe = session.table("smoothies.public.fruit_options")
 cnx = st.connection('snowflake')
 session = cnx.session()
@@ -42,5 +41,6 @@ if ingredients_list and name_on_order:
 import requests
 smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
 st.text(smoothiefroot_response)
+
 
 
