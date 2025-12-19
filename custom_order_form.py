@@ -1,7 +1,6 @@
 # Import python packages
 import streamlit as st
 from snowflake.snowpark.functions import col
-from snowflake.snowpark.context import get_active_session
 st.title('My parents new healthy diner')
 
 # Write directly to the app
@@ -14,7 +13,8 @@ st.write("The Name on Your smoothie is", name_on_order)
 
 session = get_active_session()
 my_dataframe = session.table("smoothies.public.fruit_options")
-
+cnx = st.connection('snowflake')
+session = cnx.session()
 ingredients_list = st.multiselect(
     'Choose up to 5 ingredients:',
     my_dataframe.select(col("FRUIT_NAME")).to_pandas()["FRUIT_NAME"].tolist(),
@@ -42,4 +42,5 @@ if ingredients_list and name_on_order:
 import requests
 smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
 st.text(smoothiefroot_response)
+
 
