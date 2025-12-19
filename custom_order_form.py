@@ -34,6 +34,20 @@ ingredients_list = st.multiselect(
     max_selections=5
 )
 
+if ingredients_list:
+    ingredients_string = ''
+
+    for fruit_chosen in ingredients_list:
+        ingredients_string += fruit_chosen + ' '
+        smoothiefroot_response = requests.get(
+            "https://my.smoothiefroot.com/api/fruit/watermelon"
+        )
+        sf_df = st.dataframe(
+            data=smoothiefroot_response.json(),
+            use_container_width=True
+        )
+
+
 # ------------------------------
 # Submit order to Snowflake
 # ------------------------------
@@ -61,4 +75,5 @@ if response.status_code == 200:
     st.dataframe(sf_df, use_container_width=True)
 else:
     st.error("Failed to fetch data from SmoothieFroot API")
+
 
