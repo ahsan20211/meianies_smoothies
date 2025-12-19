@@ -52,10 +52,14 @@ if ingredients_list and name_on_order:
 # Display fruit info from API
 # ------------------------------
 st.write("🍉 Example Fruit Info from API:")
-smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
+response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
 
-if smoothiefroot_response.status_code == 200:
-    fruit_data = smoothiefroot_response.json()
-    st.json(fruit_data)
+if response.status_code == 200:
+    # Convert JSON response to pandas DataFrame
+    sf_df = pd.DataFrame(response.json())
+    
+    # Display the DataFrame in Streamlit
+    st.dataframe(sf_df, use_container_width=True)
 else:
-    st.error("Failed to fetch fruit info from API.")
+    st.error("Failed to fetch data from SmoothieFroot API")")
+
