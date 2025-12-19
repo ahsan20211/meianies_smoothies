@@ -1,43 +1,61 @@
 import streamlit as st
 from snowflake.snowpark.functions import col
+import requests
 
+# ------------------------------
 # Streamlit titles
-st.title('My parents new healthy diner')
+# ------------------------------
+st.title("My parents new healthy diner")
 st.write("Customize Your Smoothie 🥤")
 st.write("Which fruits you want to customize smoothie!")
 
+# ------------------------------
 # Snowflake connection
-cnx = st.connection('snowflake')  # Make sure you already set your Snowflake connection in Streamlit Cloud
-session = cnx.session()            # Create the session first
+# ------------------------------
+cnx = st.connection('snowflake')  # Make sure your connection is set in Streamlit Cloud
+session = cnx.session()            # Create Snowflake session
 
-# Fetch data from Snowflake
+# ------------------------------
+# Fetch fruit options from Snowflake
+# ------------------------------
 my_dataframe = session.table("smoothies.public.fruit_options")
+fruit_options = my_dataframe.select(col("FRUIT_NAME")).to_pandas()["FRUIT_NAME"].tolist()
 
-# Name input
+# ------------------------------
+# User inputs
+# ------------------------------
 name_on_order = st.text_input("Name on smoothie:")
-st.write("The Name on Your smoothie is", name_on_order)
+st.write("The Name on Your smoothie is:", name_on_order)
 
-# Fruit selection
 ingredients_list = st.multiselect(
-    'Choose up to 5 ingredients:',
-    my_dataframe.select(col("FRUIT_NAME")).to_pandas()["FRUIT_NAME"].tolist(),
+    "Choose up to 5 ingredients:",
+    fruit_options,
     max_selections=5
 )
 
-# Insert order into Snowflake
+# ------------------------------
+# Submit order to Snowflake
+# ------------------------------
 if ingredients_list and name_on_order:
-    ingredients_string = ' '.join(ingredients_list)
+    ingredients_string = ', '.join(ingredients_list)
 
     my_insert_stmt = (
         f"INSERT INTO smoothies.public.orders (ingredients, name_on_order) "
         f"VALUES ('{ingredients_string}', '{name_on_order}')"
     )
 
-    if st.button('Submit Order'):
+    if st.button("Submit Order"):
         session.sql(my_insert_stmt).collect()
-        st.success('Your Smoothie is ordered!', icon="✅")
+        st.success("Your Smoothie is ordered!", icon="✅")
 
-# Example API call
-import requests
+# ------------------------------
+# Display fruit info from API
+# ------------------------------
+st.write("🍉 Example Fruit Info from API:")
 smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
-st.text(smoothiefroot_response.text)
+
+if smoothiefroot_response.status_code == 200:
+    fruit_data = smoothiefroot_response.json()
+    st.json(fruit_data)
+else:
+    st.error("Failed to fetch fruit info from API.")
