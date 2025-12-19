@@ -13,8 +13,8 @@ st.write("Which fruits you want to customize smoothie!")
 # ------------------------------
 # Snowflake connection
 # ------------------------------
-cnx = st.connection('snowflake')  # Make sure your connection is set in Streamlit Cloud
-session = cnx.session()            # Create Snowflake session
+cnx = st.connection('snowflake')
+session = cnx.session()
 
 # ------------------------------
 # Fetch fruit options from Snowflake
@@ -50,14 +50,20 @@ if ingredients_list and name_on_order:
         st.success("Your Smoothie is ordered!", icon="✅")
 
 # ------------------------------
-# Display fruit info from API
+# Display fruit info from API (ADDED CODE)
 # ------------------------------
-st.write("🍉 Example Fruit Info from API:")
+if ingredients_list:
+    st.write("🍉 Fruit Nutrition Information:")
 
-response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
+    for fruit_chosen in ingredients_list:
+        st.subheader(fruit_chosen)
 
-if response.status_code == 200:
-    sf_df = pd.DataFrame(response.json())
-    st.dataframe(sf_df, use_container_width=True)
-else:
-    st.error("Failed to fetch data from SmoothieFroot API")
+        smoothiefroot_response = requests.get(
+            f"https://my.smoothiefroot.com/api/fruit/{fruit_chosen.lower()}"
+        )
+
+        if smoothiefroot_response.status_code == 200:
+            sf_df = pd.DataFrame(smoothiefroot_response.json(), index=[0])
+            st.dataframe(sf_df, use_container_width=True)
+        else:
+            st.error(f"Failed to fetch data for {fruit_chosen}")
